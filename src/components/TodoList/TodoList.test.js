@@ -19,106 +19,105 @@ const fireButtonAddItem = () => {
   fireEvent.click(buttonItem);
 }
 
-it('should render todo list', () => {
-  render(<TodoList />);
-  const ulItem = screen.getByTestId('test-ul')
-  const inputItem = screen.getByTestId('test-input')
-  const buttonItem = screen.getByTestId('test-button')
-  const buttonItemClear = screen.getByTestId('test-button-clear')
-
-  expect(ulItem).toBeInTheDocument()
-  expect(inputItem).toBeInTheDocument()
-  expect(buttonItem).toBeInTheDocument()
-  expect(buttonItemClear).toBeInTheDocument()
-})
-
-describe('todolist actions', () => {
-  it('should add a todo item', () => {
+describe('TodoList Component', () => {
+  it('should render todo list', () => {
     render(<TodoList />);
+    const ulItem = screen.getByTestId('test-ul')
+    const inputItem = screen.getByTestId('test-input')
+    const buttonItem = screen.getByTestId('test-button')
+    const buttonItemClear = screen.getByTestId('test-button-clear')
 
-    writeItemNameInput(mockedNewTodoItemName);
-    fireButtonAddItem();
-
-    const newItemByText = screen.queryByText(mockedNewTodoItemName);
-    expect(newItemByText).toBeInTheDocument();
+    expect(ulItem).toBeInTheDocument()
+    expect(inputItem).toBeInTheDocument()
+    expect(buttonItem).toBeInTheDocument()
+    expect(buttonItemClear).toBeInTheDocument()
   })
 
-  it('should clear todo list', () => {
-    render(<TodoList initialValue={mockedInitialTodoList} />);
-    const elementButtonClear = screen.getByTestId('test-button-clear')
+  describe('actions', () => {
+    it('should add a todo item', () => {
+      render(<TodoList />);
 
-    fireEvent.click(elementButtonClear);
+      writeItemNameInput(mockedNewTodoItemName);
+      fireButtonAddItem();
 
-    mockedInitialTodoList.forEach(todoItem => {
-      const elementByText = screen.queryByText(todoItem);
-      expect(elementByText).not.toBeInTheDocument();
+      const newItemByText = screen.queryByText(mockedNewTodoItemName);
+      expect(newItemByText).toBeInTheDocument();
+    })
+
+    it('should clear todo list', () => {
+      render(<TodoList initialValue={mockedInitialTodoList} />);
+      const elementButtonClear = screen.getByTestId('test-button-clear')
+
+      fireEvent.click(elementButtonClear);
+
+      mockedInitialTodoList.forEach(todoItem => {
+        const elementByText = screen.queryByText(todoItem);
+        expect(elementByText).not.toBeInTheDocument();
+      })
+    })
+
+    it('should load todo list with initial value', () => {
+      render(<TodoList initialValue={mockedInitialTodoList} />);
+
+      mockedInitialTodoList.forEach(todoItem => {
+        const elementByText = screen.queryByText(todoItem);
+        expect(elementByText).toBeInTheDocument();
+      })
     })
   })
 
-  it('should load todo list with initial value', () => {
-    render(<TodoList initialValue={mockedInitialTodoList} />);
+  describe('hooks actions', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    })
 
-    mockedInitialTodoList.forEach(todoItem => {
-      const elementByText = screen.queryByText(todoItem);
-      expect(elementByText).toBeInTheDocument();
+    it('should add a todo item in state', () => {
+      const {
+        mockedUseState: mockedUseStateTodoList,
+        setState: setStateTodoList
+      } = useMockedState();
+
+      const {
+        mockedUseState: mockedUseStateNewTodoValue,
+      } = useMockedState();
+
+      jest.spyOn(React, 'useState')
+        .mockImplementationOnce(mockedUseStateTodoList)
+        .mockImplementationOnce(mockedUseStateNewTodoValue);
+
+      render(<TodoList />);
+
+      writeItemNameInput(mockedNewTodoItemName);
+      fireButtonAddItem();
+
+      expect(setStateTodoList).toHaveBeenCalledTimes(1);
     })
   })
 
-  it('should make post request after add todo item', () => {
-    const { successPostService } = MockedPostService(123);
+  describe('requests', () => {
+    it('should make post request after add todo item', () => {
+      const { successPostService } = MockedPostService(123);
 
-    jest.spyOn(axios, 'post')
-      .mockResolvedValueOnce(successPostService)
+      jest.spyOn(axios, 'post')
+        .mockResolvedValue(successPostService)
 
-    render(<TodoList />);
+      render(<TodoList />);
 
-    writeItemNameInput(mockedNewTodoItemName);
-    fireButtonAddItem();
+      writeItemNameInput(mockedNewTodoItemName);
+      fireButtonAddItem();
 
-    expect(axios.post).toHaveBeenCalled()
-  })
-})
+      expect(axios.post).toHaveBeenCalledTimes(1)
+    })
 
-describe('todolist hooks actions', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  })
+    it('should make post request when component load', () => {
+      const { successPostService } = MockedPostService(123);
 
-  it('should add a todo item in state', () => {
-    const {
-      mockedUseState: mockedUseStateTodoList,
-      setState: setStateTodoList
-    } = useMockedState();
+      jest.spyOn(axios, 'post')
+        .mockResolvedValueOnce(successPostService)
 
-    const {
-      mockedUseState: mockedUseStateNewTodoValue,
-    } = useMockedState();
+      render(<TodoList requestOnComponentLoad />);
 
-    jest.spyOn(React, 'useState')
-      .mockImplementationOnce(mockedUseStateTodoList)
-      .mockImplementationOnce(mockedUseStateNewTodoValue);
-
-    render(<TodoList />);
-
-    writeItemNameInput(mockedNewTodoItemName);
-    fireButtonAddItem();
-
-    expect(setStateTodoList).toHaveBeenCalledTimes(1);
-  })
-})
-
-describe('todolist requests', () => {
-  it('should make post request after add todo item', () => {
-    const { successPostService } = MockedPostService(123);
-
-    jest.spyOn(axios, 'post')
-      .mockResolvedValueOnce(successPostService)
-
-    render(<TodoList />);
-
-    writeItemNameInput(mockedNewTodoItemName);
-    fireButtonAddItem();
-
-    expect(axios.post).toHaveBeenCalled()
+      expect(axios.post).toHaveBeenCalled()
+    })
   })
 })

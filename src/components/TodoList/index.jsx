@@ -1,9 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import postService from '../../services/PostService'
 
-const TodoList = ({ initialValue = [] }) => {
+const TodoList = ({ initialValue = [], requestOnComponentLoad }) => {
   const [todoList, setTodoList] = React.useState(initialValue);
   const [newTodoValue, setNewTodoValue] = React.useState('');
+
+  useEffect(() => {
+    if (requestOnComponentLoad) {
+      postService(333)
+    }
+  }, [requestOnComponentLoad])
 
   const handleNewTodoItemInputChange = (evt) => {
     setNewTodoValue(evt.target.value);
