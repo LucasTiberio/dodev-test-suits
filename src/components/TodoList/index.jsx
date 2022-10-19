@@ -1,4 +1,5 @@
 import React from 'react'
+import postService from '../../services/PostService'
 
 const TodoList = ({ initialValue = [] }) => {
   const [todoList, setTodoList] = React.useState(initialValue);
@@ -8,9 +9,11 @@ const TodoList = ({ initialValue = [] }) => {
     setNewTodoValue(evt.target.value);
   }
 
-  const handleAddNewTodoItem = () => {
+  const handleAddNewTodoItem = async () => {
     setTodoList([...todoList, newTodoValue])
     setNewTodoValue('')
+
+    await postService(12345)
   }
 
   const handleClearTodoList = () => {

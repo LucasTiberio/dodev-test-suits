@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import axios from 'axios'
 import React from 'react'
+import MockedPostService from '../../__tests__/mocks/MockedPostService'
 import { useMockedState } from '../../__tests__/mocks/useMockedState'
 import TodoList from './index'
 
@@ -62,6 +64,26 @@ describe('todolist actions', () => {
     })
   })
 
+  it('should make post request after add todo item', () => {
+    const { successPostService } = MockedPostService(123);
+
+    jest.spyOn(axios, 'post')
+      .mockResolvedValueOnce(successPostService)
+
+    render(<TodoList />);
+
+    writeItemNameInput(mockedNewTodoItemName);
+    fireButtonAddItem();
+
+    expect(axios.post).toHaveBeenCalled()
+  })
+})
+
+describe('todolist hooks actions', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  })
+
   it('should add a todo item in state', () => {
     const {
       mockedUseState: mockedUseStateTodoList,
@@ -72,8 +94,7 @@ describe('todolist actions', () => {
       mockedUseState: mockedUseStateNewTodoValue,
     } = useMockedState();
 
-
-    React.useState = jest.fn()
+    jest.spyOn(React, 'useState')
       .mockImplementationOnce(mockedUseStateTodoList)
       .mockImplementationOnce(mockedUseStateNewTodoValue);
 
@@ -83,5 +104,21 @@ describe('todolist actions', () => {
     fireButtonAddItem();
 
     expect(setStateTodoList).toHaveBeenCalledTimes(1);
+  })
+})
+
+describe('todolist requests', () => {
+  it('should make post request after add todo item', () => {
+    const { successPostService } = MockedPostService(123);
+
+    jest.spyOn(axios, 'post')
+      .mockResolvedValueOnce(successPostService)
+
+    render(<TodoList />);
+
+    writeItemNameInput(mockedNewTodoItemName);
+    fireButtonAddItem();
+
+    expect(axios.post).toHaveBeenCalled()
   })
 })
